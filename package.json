@@ -1,6 +1,10 @@
 {
 	"name": "@jazzymcjazz/mdsvelte",
 	"version": "0.0.2",
+	"license": "MIT",
+	"author": "JazzyMcJazz",
+	"repository": "github:jazzymcjazz/mdsvelte",
+	"homepage": "https://github.com/JazzyMcJazz/mdsvelte",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",
@@ -61,6 +65,5 @@
 		"remark-parse": "^11.0.0",
 		"remark-rehype": "^11.1.1",
 		"unified": "^11.0.5"
-	},
-	"license": "MIT"
+	}
 }
