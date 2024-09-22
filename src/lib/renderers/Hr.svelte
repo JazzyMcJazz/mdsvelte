@@ -1,0 +1,2 @@
+<hr />
+<slot></slot>
