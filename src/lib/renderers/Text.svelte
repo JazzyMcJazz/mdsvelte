@@ -1,6 +1,6 @@
 <script lang="ts">
-	// eslint-disable-next-line svelte/valid-compile
-	export let text: string;
+	import type { Text } from 'mdast';
+	export let node: Text;
 </script>
 
-<slot />
+{node.value}

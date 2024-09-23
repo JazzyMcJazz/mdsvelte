@@ -1,11 +1,6 @@
 <script lang="ts">
-	import type { ImageData } from 'mdast';
-
-	export let href = '';
-	export let title: string | null | undefined;
-	export let alt: string | null | undefined;
-	// eslint-disable-next-line svelte/valid-compile
-	export let data: ImageData | undefined;
+	import type { Image } from 'mdast';
+	export let node: Image;
 </script>
 
-<img src={href} {title} {alt} />
+<img src={node.url} title={node.title} alt={node.alt} />

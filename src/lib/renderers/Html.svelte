@@ -1,6 +1,7 @@
 <script lang="ts">
-	export let text: string;
+	import type { Html } from 'mdast';
+	export let node: Html;
 </script>
 
 <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-{@html text}
+{@html node.value}

@@ -1,6 +1,6 @@
 <script lang="ts">
-	export let href: string;
-	export let title: string | null | undefined;
+	import type { Link } from 'mdast';
+	export let node: Link;
 </script>
 
-<a {href} {title}><slot></slot></a>
+<a href={node.url} title={node.title}><slot></slot></a>

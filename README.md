@@ -14,9 +14,9 @@ npm i @jazzymcjazz/mdsvelte
 
 ```html
 <script>
-    import { MdSvelte } from '@jazzymcjazz/mdsvelte';
+	import { MdSvelte } from '@jazzymcjazz/mdsvelte';
 
-    const source = `
+	const source = `
 # Some Header
 
 Some paragraph
@@ -37,6 +37,7 @@ Some paragraph
 ```
 
 ### Custom Renderer
+
 ```html
 <script>
     import { MdSvelte } from '@jazzymcjazz/mdsvelte';
@@ -45,8 +46,8 @@ Some paragraph
     const source = '...';
 </script>
 
-<MdSvelte 
-    {source} 
+<MdSvelte
+    {source}
     renderers={{
         code: MyCustomCodeComponent
     }}
@@ -59,10 +60,10 @@ You can use any plugins that work with unified. Note that additional plugins are
 
 ```js
 const processor = unified()
-    .use(remarkParse)
-    .use(remarkRehype)
-    // Added plugins here
-    .use(rehypeStringify);
+	.use(remarkParse)
+	.use(remarkRehype)
+	// Added plugins here
+	.use(rehypeStringify);
 ```
 
 To add plugins use `MdProcessor`. Note that MdProcessor is a singleton and will change the behavior of `MdSvelte` across all instances.
@@ -71,17 +72,18 @@ In the future it may be possible to install separate plugins on a per `MdSvelte`
 
 ```html
 <script>
-    import { MdSvelte, MdProcessor } from '@jazzymcjazz/mdsvelte';
-    import rehypeHighlight from 'rehype-highlight';
+	import { MdSvelte, MdProcessor } from '@jazzymcjazz/mdsvelte';
+	import rehypeHighlight from 'rehype-highlight';
 	import remarkGfm from 'remark-gfm';
 
 	MdProcessor.addPlugins([remarkGfm, rehypeHighlight]);
 
-    const source = '...';
+	const source = '...';
 </script>
 
 <MdSvelte {source} />
 ```
 
 # Note
+
 This is an early release. Documentation is still incomplete and the library only has the most basic featuers.

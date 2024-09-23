@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { AlignType } from 'mdast';
-
+	import type { TableCell } from 'mdast';
+	export const node: TableCell = {} as TableCell;
 	export let header = false;
-	export let align: AlignType | null | undefined;
+	export let align: 'left' | 'center' | 'right' | 'justify' | 'char' | null | undefined;
 </script>
 
 {#if header}

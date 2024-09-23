@@ -6,15 +6,15 @@
 	export let source: string;
 	export let renderers: Partial<Renderers> = {};
 
-	$: rootNode = MdProcessor.parse(source);
+	$: node = MdProcessor.parse(source);
 
-	$: footnotes = rootNode.children.filter((node) => node.type === 'footnoteDefinition');
+	$: definitions = node.children.filter((node) => node.type === 'definition');
 
 	$: combinedRenderers = { ...defaultRenderers, ...renderers };
 </script>
 
-<Parser node={rootNode} renderers={combinedRenderers} />
+{#each definitions as definition}
+	<svelte:component this={combinedRenderers.definition} node={definition} />
+{/each}
 
-{#if footnotes.length}
-	<svelte:component this={combinedRenderers.footnoteDefinition} nodes={footnotes} />
-{/if}
+<Parser {node} renderers={combinedRenderers} />

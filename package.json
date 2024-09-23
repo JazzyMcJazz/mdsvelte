@@ -1,6 +1,6 @@
 {
 	"name": "@jazzymcjazz/mdsvelte",
-	"version": "0.0.2",
+	"version": "0.1.0",
 	"license": "MIT",
 	"author": "JazzyMcJazz",
 	"repository": "github:jazzymcjazz/mdsvelte",
@@ -46,10 +46,6 @@
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
 		"publint": "^0.2.0",
-		"rehype-highlight": "^7.0.0",
-		"rehype-katex": "^7.0.1",
-		"remark-gfm": "^4.0.0",
-		"remark-math": "^6.0.0",
 		"svelte": "^4.2.7",
 		"svelte-check": "^4.0.0",
 		"typescript": "^5.0.0",

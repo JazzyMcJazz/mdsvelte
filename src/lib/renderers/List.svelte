@@ -1,10 +1,10 @@
 <script lang="ts">
-	export let ordered: boolean;
-	export let start: number | null | undefined;
+	import type { List } from 'mdast';
+	export let node: List;
 </script>
 
-{#if ordered}
-	<ol {start}><slot></slot></ol>
+{#if node.ordered}
+	<ol start={node.start}><slot></slot></ol>
 {:else}
 	<ul><slot></slot></ul>
 {/if}
