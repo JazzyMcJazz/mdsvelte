@@ -87,3 +87,5 @@ In the future it may be possible to install separate plugins on a per `MdSvelte`
 # Note
 
 This is an early release. Documentation is still incomplete and the library only has the most basic featuers.
+
+Expect breaking changes with each release until v1.0.

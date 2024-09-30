@@ -1,22 +1,28 @@
 import type { Root as HRoot } from 'hast';
 import type { Root } from 'mdast';
+import type { Options as RemarkRehypeOptions } from 'remark-rehype';
 
-import { unified, type PluggableList, type Processor } from 'unified';
+import { unified, type PluggableList } from 'unified';
 import rehypeStringify from 'rehype-stringify';
 import remarkRehype from 'remark-rehype';
 import remarkParse from 'remark-parse';
 
+interface PluginProps {
+	remarkPlugins?: PluggableList | null | undefined;
+	rehypePlugins?: PluggableList | null | undefined;
+	remarkRehypeOptions?: RemarkRehypeOptions | null | undefined;
+}
+
 export class MdProcessor {
 	private static processor = unified().use(remarkParse).use(remarkRehype).use(rehypeStringify);
 
-	static addPlugins(plugins: PluggableList) {
-		(this.processor as unknown as Processor<Root, Root, HRoot, undefined, undefined>) = unified()
+	static setGlobalPlugins(options: PluginProps) {
+		this.processor = unified()
 			.use(remarkParse)
-			.use(remarkRehype);
-
-		this.processor.use(plugins);
-
-		this.processor.use(rehypeStringify);
+			.use(options.remarkPlugins || [])
+			.use(remarkRehype, options.remarkRehypeOptions || {})
+			.use(options.rehypePlugins || [])
+			.use(rehypeStringify);
 	}
 
 	static parse(markdown: string): Root {
