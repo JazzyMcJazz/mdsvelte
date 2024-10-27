@@ -1,9 +1,10 @@
 <script lang="ts">
-	import type { Emphasis } from 'mdast';
-	export let node: Emphasis;
+	interface Props {
+		node: import('mdast').Emphasis;
+		children?: import('svelte').Snippet;
+	}
 
-	// A no-op function to keep the export in use
-	(() => node)();
+	let { children }: Props = $props();
 </script>
 
-<em><slot></slot></em>
+<em>{@render children?.()}</em>

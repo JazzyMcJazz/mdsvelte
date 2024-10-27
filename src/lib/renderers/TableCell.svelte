@@ -1,12 +1,16 @@
 <script lang="ts">
-	import type { TableCell } from 'mdast';
-	export const node: TableCell = {} as TableCell;
-	export let header = false;
-	export let align: 'left' | 'center' | 'right' | 'justify' | 'char' | null | undefined;
+	interface Props {
+		header?: boolean;
+		align?: 'left' | 'center' | 'right' | 'justify' | 'char' | null | undefined;
+		node: import('mdast').TableCell;
+		children?: import('svelte').Snippet;
+	}
+
+	let { header, align, children }: Props = $props();
 </script>
 
 {#if header}
-	<th {align}><slot></slot></th>
+	<th {align}>{@render children?.()}</th>
 {:else}
-	<td {align}><slot></slot></td>
+	<td {align}>{@render children?.()}</td>
 {/if}

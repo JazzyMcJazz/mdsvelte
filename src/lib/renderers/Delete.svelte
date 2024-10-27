@@ -1,9 +1,10 @@
 <script lang="ts">
-	import type { Delete } from 'mdast';
-	export let node: Delete;
+	interface Props {
+		node: import('mdast').Delete;
+		children?: import('svelte').Snippet;
+	}
 
-	// A no-op function to keep the export in use
-	(() => node)();
+	let { children }: Props = $props();
 </script>
 
-<del><slot></slot></del>
+<del>{@render children?.()}</del>

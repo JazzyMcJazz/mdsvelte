@@ -1,9 +1,13 @@
 <script lang="ts">
-	import type { Table } from 'mdast';
-	export let node: Table;
+	interface Props {
+		node: import('mdast').Table;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node, children }: Props = $props();
 
 	// A no-op function to keep the export in use
 	(() => node)();
 </script>
 
-<table><slot></slot></table>
+<table>{@render children?.()}</table>

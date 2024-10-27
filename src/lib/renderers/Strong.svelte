@@ -1,9 +1,13 @@
 <script lang="ts">
-	import type { Strong } from 'mdast';
-	export let node: Strong;
+	interface Props {
+		node: import('mdast').Strong;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node, children }: Props = $props();
 
 	// A no-op function to keep the export in use
 	(() => node)();
 </script>
 
-<strong><slot></slot></strong>
+<strong>{@render children?.()}</strong>

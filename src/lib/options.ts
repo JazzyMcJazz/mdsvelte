@@ -1,10 +1,12 @@
-import type { ComponentType } from 'svelte';
+import type { Component, Snippet } from 'svelte';
 import Blockquote from './renderers/Blockquote.svelte';
 import Break from './renderers/Break.svelte';
 import Code from './renderers/Code.svelte';
 import Definition from './renderers/Definition.svelte';
 import Del from './renderers/Delete.svelte';
 import Em from './renderers/Emphasis.svelte';
+import FootnoteDefinition from './renderers/FootnoteDefinition.svelte';
+import FootnoteReference from './renderers/FootnoteReference.svelte';
 import Heading from './renderers/Heading.svelte';
 import Hr from './renderers/Hr.svelte';
 import Html from './renderers/Html.svelte';
@@ -24,46 +26,57 @@ import TableCell from './renderers/TableCell.svelte';
 import TableHead from './renderers/TableHead.svelte';
 import TableRow from './renderers/TableRow.svelte';
 import Text from './renderers/Text.svelte';
+import Yaml from './renderers/Yaml.svelte';
 
 type PredefinedRenderers = {
-	blockquote: ComponentType<Blockquote>;
-	break: ComponentType<Break>;
-	code: ComponentType<Code>;
-	definition: ComponentType<Definition>;
-	delete: ComponentType<Del>;
-	emphasis: ComponentType<Em>;
-	heading: ComponentType<Heading>;
-	html: ComponentType<Html>;
-	image: ComponentType<Image>;
-	inlineCode: ComponentType<InlineCode>;
-	imageReference: ComponentType<ImageReference>;
-	link: ComponentType<Link>;
-	linkReference: ComponentType<LinkReference>;
-	list: ComponentType<List>;
-	orderedListItem: ComponentType<ListItem> | null;
-	unorderedListItem: ComponentType<ListItem> | null;
-	listItem: ComponentType<ListItem>;
-	paragraph: ComponentType<Paragraph>;
-	root: ComponentType<Root>;
-	strong: ComponentType<Strong>;
-	table: ComponentType<Table>;
-	tableBody: ComponentType<TableBody>;
-	tableCell: ComponentType<TableCell>;
-	tableHead: ComponentType<TableHead>;
-	tableRow: ComponentType<TableRow>;
-	thematicBreak: ComponentType<Hr>;
-	text: ComponentType<Text>;
+	blockquote: typeof Blockquote;
+	break: typeof Break;
+	code: typeof Code;
+	definition: typeof Definition;
+	delete: typeof Del;
+	emphasis: typeof Em;
+	footnoteDefinition: typeof FootnoteDefinition;
+	footnoteReference: typeof FootnoteReference;
+	heading: typeof Heading;
+	html: typeof Html;
+	image: typeof Image;
+	inlineCode: typeof InlineCode;
+	imageReference: typeof ImageReference;
+	link: typeof Link;
+	linkReference: typeof LinkReference;
+	list: typeof List;
+	orderedListItem: typeof ListItem;
+	unorderedListItem: typeof ListItem;
+	listItem: typeof ListItem;
+	paragraph: typeof Paragraph;
+	root: typeof Root;
+	strong: typeof Strong;
+	table: typeof Table;
+	tableBody: typeof TableBody;
+	tableCell: typeof TableCell;
+	tableHead: typeof TableHead;
+	tableRow: typeof TableRow;
+	thematicBreak: typeof Hr;
+	text: typeof Text;
+	yaml: typeof Yaml;
 };
 
-export type Renderers = PredefinedRenderers & Record<string, ComponentType>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ComponentProps = { node: any; children?: Snippet; [key: string]: any };
 
-export const defaultRenderers = {
+export type Renderers = {
+	[K in keyof PredefinedRenderers | string]: Component<ComponentProps, object, string>;
+};
+
+export const defaultRenderers: Renderers = {
 	blockquote: Blockquote,
 	break: Break,
 	code: Code,
 	definition: Definition,
 	delete: Del,
 	emphasis: Em,
+	footnoteDefinition: FootnoteDefinition,
+	footnoteReference: FootnoteReference,
 	heading: Heading,
 	html: Html,
 	inlineCode: InlineCode,
@@ -72,8 +85,8 @@ export const defaultRenderers = {
 	link: Link,
 	linkReference: LinkReference,
 	list: List,
-	orderedListItem: null,
-	unorderedListItem: null,
+	orderedListItem: ListItem,
+	unorderedListItem: ListItem,
 	listItem: ListItem,
 	paragraph: Paragraph,
 	root: Root,
@@ -84,5 +97,7 @@ export const defaultRenderers = {
 	tableHead: TableHead,
 	tableRow: TableRow,
 	thematicBreak: Hr,
-	text: Text
+	text: Text,
+	yaml: Yaml,
+	bob: Yaml
 };

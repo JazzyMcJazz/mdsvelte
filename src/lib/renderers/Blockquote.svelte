@@ -1,9 +1,10 @@
 <script lang="ts">
-	import type { Blockquote } from 'mdast';
-	export let node: Blockquote;
+	interface Props {
+		node: import('mdast').Blockquote;
+		children?: import('svelte').Snippet;
+	}
 
-	// A no-op function to keep the export in use
-	(() => node)();
+	let { children }: Props = $props();
 </script>
 
-<blockquote><slot></slot></blockquote>
+<blockquote>{@render children?.()}</blockquote>

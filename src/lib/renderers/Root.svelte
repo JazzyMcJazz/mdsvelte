@@ -1,9 +1,13 @@
 <script lang="ts">
-	import type { Root } from 'mdast';
-	export let node: Root = {} as Root;
+	interface Props {
+		node: import('mdast').Root;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node, children }: Props = $props();
 
 	// A no-op function to keep the export in use
 	(() => node)();
 </script>
 
-<slot></slot>
+{@render children?.()}

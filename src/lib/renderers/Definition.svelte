@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { References } from '$lib/references.js';
-	import type { Definition } from 'mdast';
-	export let node: Definition;
+
+	interface Props {
+		node: import('mdast').Definition;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node }: Props = $props();
 
 	References.set(node);
 </script>

@@ -1,7 +1,11 @@
 <script lang="ts">
-	import type { ImageReference } from 'mdast';
 	import { References } from '$lib/references.js';
-	export let node: ImageReference;
+	interface Props {
+		node: import('mdast').ImageReference;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node }: Props = $props();
 
 	const data = References.get(node.identifier);
 </script>

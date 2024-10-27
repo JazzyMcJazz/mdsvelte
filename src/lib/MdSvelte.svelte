@@ -3,18 +3,22 @@
 	import { MdProcessor } from './processor.js';
 	import { defaultRenderers, type Renderers } from './options.js';
 
-	export let source: string;
-	export let renderers: Partial<Renderers> = {};
+	interface Props {
+		source: string;
+		renderers?: Partial<Renderers>;
+	}
 
-	$: node = MdProcessor.parse(source);
+	let { source, renderers = {} }: Props = $props();
 
-	$: definitions = node.children.filter((node) => node.type === 'definition');
+	let node = $derived(MdProcessor.parse(source));
 
-	$: combinedRenderers = { ...defaultRenderers, ...renderers };
+	let definitions = $derived(node.children.filter((node) => node.type === 'definition'));
+
+	let combinedRenderers = $derived({ ...defaultRenderers, ...renderers }) as Renderers;
 </script>
 
 {#each definitions as definition}
-	<svelte:component this={combinedRenderers.definition} node={definition} />
+	<combinedRenderers.definition node={definition} />
 {/each}
 
 <Parser {node} renderers={combinedRenderers} />

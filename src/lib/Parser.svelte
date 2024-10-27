@@ -1,80 +1,92 @@
-<script>
-	export let node;
-	export let renderers;
+<script lang="ts">
+	import type { Renderers } from './options.js';
+	import type { Root, RootContent } from 'mdast';
+	import Parser from './Parser.svelte';
+
+	interface Props {
+		node: Root | RootContent;
+		renderers: Renderers;
+	}
+
+	let { node, renderers }: Props = $props();
 </script>
 
 {#if node.type in renderers}
-	<!-- Table -->
-	{#if node.type === 'table'}
-		<svelte:component this={renderers.table} {node}>
+	{#if node.type === 'root'}
+		<renderers.root {node}>
+			{#each node.children as child}
+				<Parser node={child} {renderers} />
+			{/each}
+		</renderers.root>
+
+		<!-- Table -->
+	{:else if node.type === 'table'}
+		<renderers.table {node}>
 			<!-- TableHead -->
-			<svelte:component this={renderers.tableHead}>
-				<svelte:component this={renderers.tableRow} node={node.children[0]}>
+			<renderers.tableHead {node}>
+				<renderers.tableRow node={node.children[0]}>
 					{#each node.children[0].children ?? [] as cell, i}
-						<svelte:component
-							this={renderers.tableCell}
+						<renderers.tableCell
+							node={cell}
 							header={true}
 							align={node.align ? node.align[i] : undefined}
 						>
 							{#each cell.children as content}
-								<svelte:self node={content} {renderers} />
+								<Parser node={content} {renderers} />
 							{/each}
-						</svelte:component>
+						</renderers.tableCell>
 					{/each}
-				</svelte:component>
-			</svelte:component>
+				</renderers.tableRow>
+			</renderers.tableHead>
 
 			<!-- TableBody -->
-			<svelte:component this={renderers.tableBody}>
+			<renderers.tableBody {node}>
 				{#each node.children.slice(1) ?? [] as row}
-					<svelte:component this={renderers.tableRow} node={row}>
+					<renderers.tableRow node={row}>
 						{#each row.children ?? [] as cell, i}
-							<svelte:component
-								this={renderers.tableCell}
-								align={node.align ? node.align[i] : 'center'}
-							>
+							<renderers.tableCell node={cell} align={node.align ? node.align[i] : undefined}>
 								{#each cell.children as content}
-									<svelte:self node={content} {renderers} />
+									<Parser node={content} {renderers} />
 								{/each}
-							</svelte:component>
+							</renderers.tableCell>
 						{/each}
-					</svelte:component>
+					</renderers.tableRow>
 				{/each}
-			</svelte:component>
-		</svelte:component>
+			</renderers.tableBody>
+		</renderers.table>
 
 		<!-- List -->
 	{:else if node.type === 'list'}
-		<svelte:component this={renderers.list} {node}>
+		<renderers.list {node}>
 			{#each node.children as item}
-				<svelte:component
-					this={node.ordered
-						? renderers.orderedListItem || renderers.listItem
-						: renderers.unorderedListItem || renderers.listItem}
-					node={item}
-				>
+				{@const SvelteComponent = node.ordered
+					? renderers.orderedListItem || renderers.listItem
+					: renderers.unorderedListItem || renderers.listItem}
+				<SvelteComponent node={item}>
 					{#each item.children as content}
-						<svelte:self node={content} {renderers} />
+						<Parser node={content} {renderers} />
 					{/each}
-				</svelte:component>
+				</SvelteComponent>
 			{/each}
-		</svelte:component>
+		</renderers.list>
 
 		<!-- Other -->
 	{:else if 'children' in node}
-		<svelte:component this={renderers[node.type]} {node}>
+		{@const NodeWithChildren = renderers[node.type]}
+		<NodeWithChildren {node}>
 			{#each node.children as child}
-				<svelte:self node={child} {renderers} />
+				<Parser node={child} {renderers} />
 			{/each}
-		</svelte:component>
+		</NodeWithChildren>
 	{:else}
-		<svelte:component this={renderers[node.type]} {node} />
+		{@const SvelteComponent_2 = renderers[node.type]}
+		<SvelteComponent_2 {node} />
 	{/if}
 
 	<!-- Types with no renderer -->
 {:else if 'children' in node}
 	{#each node.children as child}
-		<svelte:self node={child} {renderers} />
+		<Parser node={child} {renderers} />
 	{/each}
 {:else if 'value' in node}
 	{node.value}

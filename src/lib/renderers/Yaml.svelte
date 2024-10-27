@@ -1,6 +1,6 @@
 <script lang="ts">
 	interface Props {
-		node: import('mdast').Text;
+		node: import('mdast').Yaml;
 		children?: import('svelte').Snippet;
 	}
 

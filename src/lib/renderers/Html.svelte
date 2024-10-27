@@ -1,6 +1,10 @@
 <script lang="ts">
-	import type { Html } from 'mdast';
-	export let node: Html;
+	interface Props {
+		node: import('mdast').Html;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node }: Props = $props();
 </script>
 
 <!-- eslint-disable-next-line svelte/no-at-html-tags -->

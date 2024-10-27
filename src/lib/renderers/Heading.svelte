@@ -1,18 +1,22 @@
 <script lang="ts">
-	import type { Heading } from 'mdast';
-	export let node: Heading;
+	interface Props {
+		node: import('mdast').Heading;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node, children }: Props = $props();
 </script>
 
 {#if node.depth === 1}
-	<h1><slot></slot></h1>
+	<h1>{@render children?.()}</h1>
 {:else if node.depth === 2}
-	<h2><slot></slot></h2>
+	<h2>{@render children?.()}</h2>
 {:else if node.depth === 3}
-	<h3><slot></slot></h3>
+	<h3>{@render children?.()}</h3>
 {:else if node.depth === 4}
-	<h4><slot></slot></h4>
+	<h4>{@render children?.()}</h4>
 {:else if node.depth === 5}
-	<h5><slot></slot></h5>
+	<h5>{@render children?.()}</h5>
 {:else if node.depth === 6}
-	<h6><slot></slot></h6>
+	<h6>{@render children?.()}</h6>
 {/if}

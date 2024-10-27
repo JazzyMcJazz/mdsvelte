@@ -1,13 +1,13 @@
 <script lang="ts">
 	interface Props {
-		node: import('mdast').ThematicBreak;
+		node: import('mdast').FootnoteReference;
 		children?: import('svelte').Snippet;
 	}
 
-	let { node }: Props = $props();
+	let { node, children }: Props = $props();
 
 	// A no-op function to keep the export in use
 	(() => node)();
 </script>
 
-<hr />
+<blockquote>{@render children?.()}</blockquote>

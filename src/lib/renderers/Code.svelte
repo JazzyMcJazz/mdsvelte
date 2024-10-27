@@ -1,6 +1,10 @@
 <script lang="ts">
-	import type { Code } from 'mdast';
-	export let node: Code;
+	interface Props {
+		node: import('mdast').Code;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node }: Props = $props();
 </script>
 
 <pre><code>{node.value}</code></pre>

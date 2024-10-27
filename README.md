@@ -8,6 +8,9 @@ A markdown parser that renders into Svelte components. Inspired by [svelte-markd
 npm i @jazzymcjazz/mdsvelte
 ```
 
+# Requirements
+As of version 0.3.0 Svelte 5 is required.
+
 # Usage
 
 ### Basic

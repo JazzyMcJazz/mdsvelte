@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { References } from '$lib/references.js';
-	import type { LinkReference } from 'mdast';
-	export let node: LinkReference;
+
+	interface Props {
+		node: import('mdast').LinkReference;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node, children }: Props = $props();
 
 	const data = References.get(node.identifier);
 </script>
 
-<a href={data?.url} title={data?.title}><slot></slot></a>
+<a href={data?.url} title={data?.title}>{@render children?.()}</a>

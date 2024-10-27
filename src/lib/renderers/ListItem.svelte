@@ -1,9 +1,13 @@
 <script lang="ts">
-	import type { ListItem } from 'mdast';
-	export let node: ListItem;
+	interface Props {
+		node: import('mdast').ListItem;
+		children?: import('svelte').Snippet;
+	}
+
+	let { node, children }: Props = $props();
 
 	// A no-op function to keep the export in use
 	(() => node)();
 </script>
 
-<li><slot></slot></li>
+<li>{@render children?.()}</li>
