@@ -9,6 +9,7 @@ npm i @jazzymcjazz/mdsvelte
 ```
 
 # Requirements
+
 As of version 0.3.0 Svelte 5 is required.
 
 # Usage

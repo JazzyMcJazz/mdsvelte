@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { MdSvelte } from '$lib/index.js';
+	import type { Root } from 'mdast';
 
 	const sources: string[] = [
 		// Headers
@@ -49,10 +50,14 @@
 		// Code
 		'```javascript\nconst message = "Hello, World!"\nconsole.log(message);\n```'
 	];
+
+	function onparse(node: Root) {
+		console.log(node);
+	}
 </script>
 
 {#each sources as source}
-	<MdSvelte {source} />
+	<MdSvelte {source} {onparse} />
 {/each}
 
 <style>

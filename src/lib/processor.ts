@@ -1,5 +1,5 @@
-import type { Root as HRoot } from 'hast';
 import type { Root } from 'mdast';
+import type { Root as HRoot } from 'hast';
 import type { Options as RemarkRehypeOptions } from 'remark-rehype';
 
 import { unified, type PluggableList } from 'unified';
