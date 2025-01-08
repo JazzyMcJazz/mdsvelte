@@ -24,6 +24,7 @@ export type {
 	ListItem,
 	Paragraph,
 	Root,
+	RootContent,
 	Strong,
 	Table,
 	TableCell,

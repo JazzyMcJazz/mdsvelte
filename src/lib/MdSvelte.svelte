@@ -1,3 +1,33 @@
+<!-- 
+	@component
+	
+	A component that parses markdown source into an AST and renders it using a custom renderer.
+
+	Example usage:
+
+	```svelte
+	<script>
+		import { MdSvelte, type Root } from '@jazzymcjazz/mdsvelte';
+		import CustomHeading from './CustomHeading.svelte';
+
+		const markdown = '# Hello, World!';
+
+		const customRenderers = {
+			heading: CustomHeading,
+		};
+		
+		const onparse = (node: Root) => {
+			console.log(node);
+		};
+	</script>
+
+	<MdSvelte 
+		source={markdown}
+		renderers={customRenderers}
+		onparse={onparse}
+	/>
+	```
+-->
 <script lang="ts">
 	import type { Root } from 'mdast';
 	import Parser from './Parser.svelte';
@@ -5,8 +35,18 @@
 	import { defaultRenderers, type Renderers } from './options.js';
 
 	interface Props {
+		/**
+		 * The markdown source to parse.
+		 */
 		source: string;
+		/**
+		 * Custom renderers for specific node types.
+		 */
 		renderers?: Partial<Renderers>;
+		/**
+		 * Callback that is called after the markdown source is parsed into an AST.
+		 * @param node The root node of the parsed AST.
+		 */
 		onparse?: (node: Root) => void;
 	}
 
