@@ -52,7 +52,11 @@
 
 	let { source, renderers = {}, onparse = () => {} }: Props = $props();
 
-	let node = $derived(MdProcessor.parse(source));
+	let node = $derived.by(() => {
+		const mdast = MdProcessor.parse(source);
+		MdProcessor.run(mdast); // Run plugins
+		return mdast;
+	});
 
 	let definitions = $derived(node.children.filter((node) => node.type === 'definition'));
 
