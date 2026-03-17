@@ -4,10 +4,7 @@
 		children?: import('svelte').Snippet;
 	}
 
-	let { node, children }: Props = $props();
-
-	// A no-op function to keep the export in use
-	(() => node)();
+	let { children }: Props = $props();
 </script>
 
 <tr>{@render children?.()}</tr>

@@ -56,7 +56,7 @@
 	}
 </script>
 
-{#each sources as source}
+{#each sources as source, i (i)}
 	<MdSvelte {source} {onparse} />
 {/each}
 

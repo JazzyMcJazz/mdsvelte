@@ -28,6 +28,12 @@ export default [
 		}
 	},
 	{
+		files: ['src/lib/renderers/**/*.svelte'],
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off'
+		}
+	},
+	{
 		ignores: ['build/', '.svelte-kit/', 'dist/']
 	}
 ];

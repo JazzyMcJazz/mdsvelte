@@ -4,10 +4,8 @@
 		children?: import('svelte').Snippet;
 	}
 
-	let { node }: Props = $props();
-
-	// A no-op function to keep the export in use
-	(() => node)();
+	// eslint-disable-next-line no-empty-pattern
+	let {}: Props = $props();
 </script>
 
 <hr />

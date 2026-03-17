@@ -75,8 +75,6 @@ export const defaultRenderers: Renderers = {
 	definition: Definition,
 	delete: Del,
 	emphasis: Em,
-	footnoteDefinition: FootnoteDefinition,
-	footnoteReference: FootnoteReference,
 	heading: Heading,
 	html: Html,
 	inlineCode: InlineCode,
@@ -98,6 +96,5 @@ export const defaultRenderers: Renderers = {
 	tableRow: TableRow,
 	thematicBreak: Hr,
 	text: Text,
-	yaml: Yaml,
-	bob: Yaml
+	yaml: Yaml
 };

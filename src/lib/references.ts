@@ -1,13 +1,11 @@
 import type { Definition } from 'mdast';
 
-export class References {
-	private static definitions: Map<string, Definition> = new Map();
-
-	static set(reference: Definition) {
-		this.definitions.set(reference.identifier, reference);
-	}
-
-	static get(identifier: string): Definition | undefined {
-		return this.definitions.get(identifier);
-	}
+export function createReferences(definitions: Definition[]) {
+	const map = new Map<string, Definition>();
+	for (const def of definitions) map.set(def.identifier, def);
+	return {
+		get: (id: string): Definition | undefined => map.get(id)
+	};
 }
+
+export type References = ReturnType<typeof createReferences>;

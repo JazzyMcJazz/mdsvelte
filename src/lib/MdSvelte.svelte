@@ -29,10 +29,12 @@
 	```
 -->
 <script lang="ts">
-	import type { Root } from 'mdast';
+	import type { Root, Definition } from 'mdast';
+	import { setContext } from 'svelte';
 	import Parser from './Parser.svelte';
 	import { MdProcessor } from './processor.js';
 	import { defaultRenderers, type Renderers } from './options.js';
+	import { createReferences } from './references.js';
 
 	interface Props {
 		/**
@@ -50,7 +52,7 @@
 		onparse?: (node: Root) => void;
 	}
 
-	let { source, renderers = {}, onparse = () => {} }: Props = $props();
+	let { source, renderers = {}, onparse }: Props = $props();
 
 	let node = $derived.by(() => {
 		const mdast = MdProcessor.parse(source);
@@ -58,15 +60,21 @@
 		return mdast;
 	});
 
-	let definitions = $derived(node.children.filter((node) => node.type === 'definition'));
+	let definitions = $derived(
+		node.children.filter((child): child is Definition => child.type === 'definition')
+	);
+
+	let refs = $derived(createReferences(definitions));
+
+	setContext('mdsvelte-references', {
+		get: (id: string) => refs.get(id)
+	});
 
 	let combinedRenderers = $derived({ ...defaultRenderers, ...renderers }) as Renderers;
 
-	$effect(() => onparse(node));
+	$effect(() => {
+		if (onparse) onparse(node);
+	});
 </script>
-
-{#each definitions as definition}
-	<combinedRenderers.definition node={definition} />
-{/each}
 
 <Parser {node} renderers={combinedRenderers} />

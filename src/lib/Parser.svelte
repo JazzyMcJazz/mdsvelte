@@ -14,7 +14,7 @@
 {#if node.type in renderers}
 	{#if node.type === 'root'}
 		<renderers.root {node}>
-			{#each node.children as child}
+			{#each node.children as child, i (i)}
 				<Parser node={child} {renderers} />
 			{/each}
 		</renderers.root>
@@ -25,13 +25,13 @@
 			<!-- TableHead -->
 			<renderers.tableHead {node}>
 				<renderers.tableRow node={node.children[0]}>
-					{#each node.children[0].children ?? [] as cell, i}
+					{#each node.children[0].children ?? [] as cell, i (i)}
 						<renderers.tableCell
 							node={cell}
 							header={true}
 							align={node.align ? node.align[i] : undefined}
 						>
-							{#each cell.children as content}
+							{#each cell.children as content, j (j)}
 								<Parser node={content} {renderers} />
 							{/each}
 						</renderers.tableCell>
@@ -41,11 +41,11 @@
 
 			<!-- TableBody -->
 			<renderers.tableBody {node}>
-				{#each node.children.slice(1) ?? [] as row}
+				{#each node.children.slice(1) ?? [] as row, i (i)}
 					<renderers.tableRow node={row}>
-						{#each row.children ?? [] as cell, i}
-							<renderers.tableCell node={cell} align={node.align ? node.align[i] : undefined}>
-								{#each cell.children as content}
+						{#each row.children ?? [] as cell, j (j)}
+							<renderers.tableCell node={cell} align={node.align ? node.align[j] : undefined}>
+								{#each cell.children as content, k (k)}
 									<Parser node={content} {renderers} />
 								{/each}
 							</renderers.tableCell>
@@ -58,12 +58,12 @@
 		<!-- List -->
 	{:else if node.type === 'list'}
 		<renderers.list {node}>
-			{#each node.children as item}
+			{#each node.children as item, i (i)}
 				{@const SvelteComponent = node.ordered
 					? renderers.orderedListItem || renderers.listItem
 					: renderers.unorderedListItem || renderers.listItem}
 				<SvelteComponent node={item}>
-					{#each item.children as content}
+					{#each item.children as content, j (j)}
 						<Parser node={content} {renderers} />
 					{/each}
 				</SvelteComponent>
@@ -74,7 +74,7 @@
 	{:else if 'children' in node}
 		{@const NodeWithChildren = renderers[node.type]}
 		<NodeWithChildren {node}>
-			{#each node.children as child}
+			{#each node.children as child, i (i)}
 				<Parser node={child} {renderers} />
 			{/each}
 		</NodeWithChildren>
@@ -84,10 +84,16 @@
 	{/if}
 
 	<!-- Types with no renderer -->
-{:else if 'children' in node}
-	{#each node.children as child}
-		<Parser node={child} {renderers} />
-	{/each}
-{:else if 'value' in node}
-	{node.value}
+{:else}
+	{(() => {
+		console.warn(`[mdsvelte] No renderer found for node type: "${node.type}"`);
+		return '';
+	})()}
+	{#if 'children' in node}
+		{#each node.children as child, i (i)}
+			<Parser node={child} {renderers} />
+		{/each}
+	{:else if 'value' in node}
+		{node.value}
+	{/if}
 {/if}
