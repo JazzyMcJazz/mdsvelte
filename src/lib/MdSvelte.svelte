@@ -1,7 +1,8 @@
-<!-- 
+<!--
 	@component
-	
+
 	A component that parses markdown source into an AST and renders it using a custom renderer.
+	Supports incremental parsing with throttling for efficient LLM streaming.
 
 	Example usage:
 
@@ -15,24 +16,25 @@
 		const customRenderers = {
 			heading: CustomHeading,
 		};
-		
+
 		const onparse = (node: Root) => {
 			console.log(node);
 		};
 	</script>
 
-	<MdSvelte 
+	<MdSvelte
 		source={markdown}
 		renderers={customRenderers}
 		onparse={onparse}
+		throttleMs={30}
 	/>
 	```
 -->
 <script lang="ts">
 	import type { Root, Definition } from 'mdast';
-	import { setContext } from 'svelte';
+	import { setContext, untrack } from 'svelte';
 	import Parser from './Parser.svelte';
-	import { MdProcessor } from './processor.js';
+	import { IncrementalParser } from './incremental.js';
 	import { defaultRenderers, type Renderers } from './options.js';
 	import { createReferences } from './references.js';
 
@@ -50,14 +52,58 @@
 		 * @param node The root node of the parsed AST.
 		 */
 		onparse?: (node: Root) => void;
+		/**
+		 * Throttle interval in milliseconds for debouncing rapid source updates (e.g., LLM streaming).
+		 * Set to 0 to disable throttling. Default: 0 (no throttling).
+		 */
+		throttleMs?: number;
 	}
 
-	let { source, renderers = {}, onparse }: Props = $props();
+	let { source, renderers = {}, onparse, throttleMs = 0 }: Props = $props();
+
+	const parser = new IncrementalParser();
+
+	let throttledSource = $state('');
+	let lastFlush = 0;
+	let trailingTimer: ReturnType<typeof setTimeout> | null = null;
+
+	$effect(() => {
+		const src = source;
+		if (throttleMs <= 0) {
+			throttledSource = src;
+			return;
+		}
+
+		const now = Date.now();
+		const elapsed = now - lastFlush;
+
+		// Clear any pending trailing update
+		if (trailingTimer !== null) clearTimeout(trailingTimer);
+
+		if (elapsed >= throttleMs) {
+			// Enough time has passed — flush immediately (leading edge)
+			throttledSource = src;
+			lastFlush = now;
+		}
+
+		// Always schedule a trailing update to capture the final value
+		trailingTimer = setTimeout(() => {
+			trailingTimer = null;
+			throttledSource = src;
+			lastFlush = Date.now();
+		}, throttleMs);
+
+		return () => {
+			if (trailingTimer !== null) clearTimeout(trailingTimer);
+		};
+	});
+
+	// Use throttledSource when throttling is active, source directly otherwise.
+	// In SSR, $effect doesn't run, so we fall back to source directly.
+	let effectiveSource = $derived(throttleMs > 0 ? throttledSource : source);
 
 	let node = $derived.by(() => {
-		const mdast = MdProcessor.parse(source);
-		MdProcessor.run(mdast); // Run plugins
-		return mdast;
+		return parser.update(effectiveSource);
 	});
 
 	let definitions = $derived(
@@ -73,7 +119,10 @@
 	let combinedRenderers = $derived({ ...defaultRenderers, ...renderers }) as Renderers;
 
 	$effect(() => {
-		if (onparse) onparse(node);
+		const n = node;
+		untrack(() => {
+			if (onparse) onparse(n);
+		});
 	});
 </script>
 

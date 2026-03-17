@@ -177,6 +177,48 @@ describe('MdSvelte onparse callback', () => {
 	});
 });
 
+describe('MdSvelte throttle', () => {
+	it('updates rendering during rapid source changes with throttleMs', async () => {
+		const onparse = vi.fn();
+		const { rerender } = render(MdSvelte, {
+			props: { source: '', onparse, throttleMs: 30 }
+		});
+
+		// Simulate rapid streaming: update source every 10ms, 10 times
+		for (let i = 1; i <= 10; i++) {
+			await rerender({ source: 'x'.repeat(i * 10), onparse, throttleMs: 30 });
+			await new Promise((r) => setTimeout(r, 10));
+		}
+
+		// Wait for trailing throttle to fire
+		await new Promise((r) => setTimeout(r, 50));
+
+		// With a working throttle, onparse should have been called multiple times
+		// (not just once at the start and once at the end).
+		// With a 30ms throttle over 100ms of streaming, we expect at least 3 calls.
+		expect(onparse.mock.calls.length).toBeGreaterThanOrEqual(3);
+	});
+
+	it('renders final content after throttled streaming completes', async () => {
+		const { container, rerender } = render(MdSvelte, {
+			props: { source: '', throttleMs: 30 }
+		});
+
+		// Stream a heading + paragraph
+		const chunks = ['# He', '# Hell', '# Hello', '# Hello\n\nWorld'];
+		for (const chunk of chunks) {
+			await rerender({ source: chunk, throttleMs: 30 });
+			await new Promise((r) => setTimeout(r, 10));
+		}
+
+		// Wait for trailing throttle
+		await new Promise((r) => setTimeout(r, 50));
+
+		expect(container.querySelector('h1')?.textContent).toBe('Hello');
+		expect(container.querySelector('p')?.textContent).toBe('World');
+	});
+});
+
 describe('MdSvelte custom renderers', () => {
 	it('uses a custom renderer for a node type', async () => {
 		// We can't easily create a Svelte component inline in a test,
