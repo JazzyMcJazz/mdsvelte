@@ -219,6 +219,55 @@ describe('MdSvelte throttle', () => {
 	});
 });
 
+describe('MdSvelte per-instance plugins', () => {
+	it('renders with instance-level remark plugins', () => {
+		const { container } = render(MdSvelte, {
+			props: { source: '~~deleted~~', remarkPlugins: [remarkGfm] }
+		});
+		expect(container.querySelector('del')?.textContent).toBe('deleted');
+	});
+
+	it('does not affect other instances without plugins', () => {
+		// Instance with GFM
+		const { container: withGfm } = render(MdSvelte, {
+			props: { source: '~~deleted~~', remarkPlugins: [remarkGfm] }
+		});
+		expect(withGfm.querySelector('del')?.textContent).toBe('deleted');
+
+		// Instance without plugins — should NOT render strikethrough
+		const { container: withoutGfm } = render(MdSvelte, {
+			props: { source: '~~not deleted~~' }
+		});
+		expect(withoutGfm.querySelector('del')).toBeNull();
+	});
+
+	it('does not affect global processor when using instance plugins', () => {
+		render(MdSvelte, {
+			props: { source: '~~a~~', remarkPlugins: [remarkGfm] }
+		});
+		// Global processor should NOT have GFM
+		const html = MdProcessor.process('~~b~~');
+		expect(html).not.toContain('<del>');
+	});
+
+	it('falls back to global processor when no instance plugins provided', () => {
+		MdProcessor.setGlobalPlugins({ remarkPlugins: [remarkGfm] });
+		const { container } = render(MdSvelte, {
+			props: { source: '~~deleted~~' }
+		});
+		expect(container.querySelector('del')?.textContent).toBe('deleted');
+	});
+
+	it('overrides global plugins when instance plugins are provided', () => {
+		MdProcessor.setGlobalPlugins({ remarkPlugins: [remarkGfm] });
+		// Instance with empty plugins — should override global and NOT have GFM
+		const { container } = render(MdSvelte, {
+			props: { source: '~~not deleted~~', remarkPlugins: [] }
+		});
+		expect(container.querySelector('del')).toBeNull();
+	});
+});
+
 describe('MdSvelte custom renderers', () => {
 	it('uses a custom renderer for a node type', async () => {
 		// We can't easily create a Svelte component inline in a test,

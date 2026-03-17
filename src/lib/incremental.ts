@@ -1,5 +1,5 @@
 import type { Root, RootContent } from 'mdast';
-import { MdProcessor } from './processor.js';
+import { MdProcessor, type MarkdownProcessor } from './processor.js';
 
 interface ParserContext {
 	inFencedCode: boolean;
@@ -277,13 +277,25 @@ export interface ParseStats {
 	totalLines: number;
 }
 
+/**
+ * Node types that require whole-document visibility to resolve correctly.
+ * When these appear in newly parsed content, the cache must be invalidated
+ * because earlier blocks may have been parsed without them in scope.
+ */
+const CROSS_REFERENCE_TYPES = new Set(['footnoteDefinition']);
+
 export class IncrementalParser {
+	private processor: MarkdownProcessor;
 	private previousSource = '';
 	private lines: string[] = [];
 	private context: ParserContext = createContext();
 	private cachedChildren: RootContent[] = [];
 	private pendingStartLine = 0;
-	private boundaryLines: number[] = [];
+	private hasCrossReferences = false;
+
+	constructor(processor?: MarkdownProcessor) {
+		this.processor = processor ?? MdProcessor;
+	}
 
 	stats: ParseStats = {
 		updates: 0,
@@ -310,6 +322,19 @@ export class IncrementalParser {
 		this.lines = source.split('\n');
 		this.stats.totalLines = this.lines.length;
 
+		// When cross-references (e.g., footnotes) are present, block-level
+		// caching is unsafe because blocks parsed in isolation won't resolve
+		// references that depend on definitions elsewhere in the document.
+		// Fall back to full document parsing.
+		if (this.hasCrossReferences) {
+			const fullParsed = this.processor.parse(source);
+			this.processor.run(fullParsed);
+			this.stats.tailParses++;
+			this.stats.tailLines = this.lines.length;
+			this.stats.cachedBlocks = 0;
+			return fullParsed;
+		}
+
 		// Find new block boundaries from where we left off
 		const { boundaries, context } = findBlockBoundaries(
 			this.lines,
@@ -322,7 +347,6 @@ export class IncrementalParser {
 			// All boundaries except the last one are "finalized" —
 			// they have at least one complete block after them.
 			const finalizableBoundaries = boundaries.slice(0, -1);
-			const lastBoundary = boundaries[boundaries.length - 1];
 
 			if (finalizableBoundaries.length > 0) {
 				// Parse the text from pendingStartLine to the last finalizable boundary
@@ -330,7 +354,7 @@ export class IncrementalParser {
 				const text = this.lines.slice(this.pendingStartLine, endLine + 1).join('\n');
 
 				if (text.trim()) {
-					const parsed = MdProcessor.parse(text);
+					const parsed = this.processor.parse(text);
 					this.cachedChildren.push(...parsed.children);
 					this.stats.cacheParses++;
 				}
@@ -339,7 +363,6 @@ export class IncrementalParser {
 			}
 
 			// Update stored boundaries (keep only the last one as "pending confirmation")
-			this.boundaryLines = [lastBoundary];
 		}
 
 		this.context = context;
@@ -352,19 +375,35 @@ export class IncrementalParser {
 		this.stats.cachedBlocks = this.cachedChildren.length;
 
 		if (tailText.trim()) {
-			const tailParsed = MdProcessor.parse(tailText);
+			const tailParsed = this.processor.parse(tailText);
 			tailChildren = tailParsed.children;
 			this.stats.tailParses++;
 		}
 
 		// Stitch the full tree
+		const allChildren = [...this.cachedChildren, ...tailChildren];
+
+		// Check if the document now contains cross-reference types.
+		// If so, permanently disable caching and do a full re-parse to
+		// ensure all references are resolved correctly.
+		if (allChildren.some((c) => CROSS_REFERENCE_TYPES.has(c.type))) {
+			this.hasCrossReferences = true;
+			this.cachedChildren = [];
+			this.pendingStartLine = 0;
+			this.context = createContext();
+
+			const fullParsed = this.processor.parse(source);
+			this.processor.run(fullParsed);
+			return fullParsed;
+		}
+
 		const root: Root = {
 			type: 'root',
-			children: [...this.cachedChildren, ...tailChildren]
+			children: allChildren
 		};
 
 		// Run transform plugins on the full stitched tree
-		MdProcessor.run(root);
+		this.processor.run(root);
 
 		return root;
 	}
@@ -375,7 +414,7 @@ export class IncrementalParser {
 		this.context = createContext();
 		this.cachedChildren = [];
 		this.pendingStartLine = 0;
-		this.boundaryLines = [];
+		this.hasCrossReferences = false;
 		this.stats = {
 			updates: 0,
 			tailParses: 0,

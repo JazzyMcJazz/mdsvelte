@@ -106,7 +106,27 @@ You can use any remark/rehype plugins that work with unified. Remark plugins are
 unified → remarkParse → [remarkPlugins] → remarkRehype → [rehypePlugins] → rehypeStringify
 ```
 
-Use `MdProcessor.setGlobalPlugins` to configure plugins. Note that plugins are currently global — all `MdSvelte` instances share the same configuration.
+#### Per-Instance Plugins
+
+Pass plugins directly to individual `MdSvelte` instances:
+
+```svelte
+<script>
+	import { MdSvelte } from '@jazzymcjazz/mdsvelte';
+	import remarkGfm from 'remark-gfm';
+	import remarkMath from 'remark-math';
+
+	const source = '...';
+</script>
+
+<MdSvelte {source} remarkPlugins={[remarkGfm, remarkMath]} />
+```
+
+When any plugin prop is provided (even an empty array), the instance uses its own processor, ignoring global plugins.
+
+#### Global Plugins
+
+Use `MdProcessor.setGlobalPlugins` to configure plugins shared by all instances that don't have their own plugin props:
 
 ```svelte
 <script>
@@ -134,6 +154,7 @@ Note: MdSvelte renders MDAST nodes directly via Svelte components, not the rehyp
 	let { node } = $props();
 	let html = $derived(katex.renderToString(node.value, { displayMode: true, throwOnError: false }));
 </script>
+
 <div>{@html html}</div>
 ```
 
@@ -143,12 +164,15 @@ Note: MdSvelte renders MDAST nodes directly via Svelte components, not the rehyp
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `source` | `string` | required | Markdown source text |
-| `renderers` | `Partial<Renderers>` | `{}` | Custom renderers for node types |
-| `onparse` | `(node: Root) => void` | — | Callback after each parse |
-| `throttleMs` | `number` | `0` | Throttle interval for streaming (ms) |
+| Prop                  | Type                   | Default  | Description                          |
+| --------------------- | ---------------------- | -------- | ------------------------------------ |
+| `source`              | `string`               | required | Markdown source text                 |
+| `renderers`           | `Partial<Renderers>`   | `{}`     | Custom renderers for node types      |
+| `onparse`             | `(node: Root) => void` | —        | Callback after each parse            |
+| `throttleMs`          | `number`               | `0`      | Throttle interval for streaming (ms) |
+| `remarkPlugins`       | `PluggableList`        | —        | Instance-level remark plugins        |
+| `rehypePlugins`       | `PluggableList`        | —        | Instance-level rehype plugins        |
+| `remarkRehypeOptions` | `RemarkRehypeOptions`  | —        | Instance-level remark-rehype options |
 
 ## Note
 

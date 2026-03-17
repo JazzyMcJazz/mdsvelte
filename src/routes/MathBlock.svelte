@@ -9,4 +9,5 @@
 	let html = $derived(katex.renderToString(node.value, { displayMode: true, throwOnError: false }));
 </script>
 
+<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 <div class="math-block">{@html html}</div>

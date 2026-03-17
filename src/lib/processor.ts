@@ -7,10 +7,15 @@ import rehypeStringify from 'rehype-stringify';
 import remarkRehype from 'remark-rehype';
 import remarkParse from 'remark-parse';
 
-interface PluginProps {
+export interface PluginProps {
 	remarkPlugins?: PluggableList | null | undefined;
 	rehypePlugins?: PluggableList | null | undefined;
 	remarkRehypeOptions?: RemarkRehypeOptions | null | undefined;
+}
+
+export interface MarkdownProcessor {
+	parse(markdown: string): Root;
+	run(node: Root): HRoot;
 }
 
 export class MdProcessor {
@@ -39,5 +44,19 @@ export class MdProcessor {
 
 	static process(markdown: string): string {
 		return this.processor.processSync(markdown).toString();
+	}
+
+	static createInstance(options: PluginProps): MarkdownProcessor {
+		const proc = unified()
+			.use(remarkParse)
+			.use(options.remarkPlugins || [])
+			.use(remarkRehype, options.remarkRehypeOptions || {})
+			.use(options.rehypePlugins || [])
+			.use(rehypeStringify);
+
+		return {
+			parse: (markdown: string) => proc.parse(markdown) as Root,
+			run: (node: Root) => proc.runSync(node)
+		};
 	}
 }

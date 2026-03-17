@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import remarkGfm from 'remark-gfm';
 import { IncrementalParser } from '$lib/incremental.js';
 import { MdProcessor } from '$lib/processor.js';
 
@@ -207,6 +208,61 @@ describe('IncrementalParser', () => {
 			const root = parser.update('New content');
 			expect(root.children).toHaveLength(1);
 			expect(root.children[0].type).toBe('paragraph');
+		});
+	});
+
+	describe('cross-reference invalidation', () => {
+		it('resolves footnote references when definition arrives after reference', () => {
+			MdProcessor.setGlobalPlugins({ remarkPlugins: [remarkGfm] });
+			const parser = new IncrementalParser();
+
+			// Stream content with a footnote reference first
+			let source = 'Here is a footnote[^1].\n\n';
+			parser.update(source);
+
+			// Add more blocks so the first one gets cached
+			source += 'Some other paragraph.\n\n';
+			parser.update(source);
+
+			source += 'Yet another paragraph.\n\n';
+			parser.update(source);
+
+			// Now the definition arrives
+			source += '[^1]: This is the footnote content.';
+			const root = parser.update(source);
+
+			// The tree should contain both footnoteReference and footnoteDefinition
+			const hasFootnoteRef = JSON.stringify(root).includes('"type":"footnoteReference"');
+			const hasFootnoteDef = root.children.some((c) => c.type === 'footnoteDefinition');
+
+			expect(hasFootnoteDef).toBe(true);
+			expect(hasFootnoteRef).toBe(true);
+		});
+
+		it('handles footnote definition appearing mid-stream', () => {
+			MdProcessor.setGlobalPlugins({ remarkPlugins: [remarkGfm] });
+			const parser = new IncrementalParser();
+
+			// Build up incrementally with chunks
+			const chunks = [
+				'Text with ref[^note].',
+				'\n\nAnother paragraph.',
+				'\n\nThird paragraph.',
+				'\n\n[^note]: The definition.'
+			];
+
+			let source = '';
+			let root;
+			for (const chunk of chunks) {
+				source += chunk;
+				root = parser.update(source);
+			}
+
+			const hasFootnoteRef = JSON.stringify(root).includes('"type":"footnoteReference"');
+			const hasFootnoteDef = root!.children.some((c) => c.type === 'footnoteDefinition');
+
+			expect(hasFootnoteDef).toBe(true);
+			expect(hasFootnoteRef).toBe(true);
 		});
 	});
 

@@ -226,7 +226,9 @@ That's all for this demo!`;
 
 		<div class="stats">
 			<div class="stat">
-				<span class="stat-value">{charCount}<span class="stat-unit">/{sampleMarkdown.length}</span></span>
+				<span class="stat-value"
+					>{charCount}<span class="stat-unit">/{sampleMarkdown.length}</span></span
+				>
 				<span class="stat-label">chars</span>
 			</div>
 			<div class="stat">
@@ -242,7 +244,9 @@ That's all for this demo!`;
 				<span class="stat-label">cached blocks</span>
 			</div>
 			<div class="stat">
-				<span class="stat-value">{stats.tailLines}<span class="stat-unit">/{stats.totalLines}</span></span>
+				<span class="stat-value"
+					>{stats.tailLines}<span class="stat-unit">/{stats.totalLines}</span></span
+				>
 				<span class="stat-label">tail/total lines</span>
 			</div>
 			<div class="stat">
@@ -280,12 +284,7 @@ That's all for this demo!`;
 		margin: 0;
 		background-color: #0d1117;
 		color: #e6edf3;
-		font-family:
-			-apple-system,
-			BlinkMacSystemFont,
-			'Segoe UI',
-			Roboto,
-			sans-serif;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	}
 
 	.demo {

@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import remarkGfm from 'remark-gfm';
 import { MdProcessor } from '$lib/processor.js';
 
 afterEach(() => {
@@ -70,6 +71,41 @@ describe('MdProcessor.process', () => {
 	it('converts headings to HTML', () => {
 		const html = MdProcessor.process('# Title');
 		expect(html).toContain('<h1>Title</h1>');
+	});
+});
+
+describe('MdProcessor.createInstance', () => {
+	it('creates an independent processor with plugins', () => {
+		const proc = MdProcessor.createInstance({ remarkPlugins: [remarkGfm] });
+		const root = proc.parse('~~deleted~~');
+		const paragraph = root.children[0];
+		expect(paragraph.type).toBe('paragraph');
+		// With GFM, the paragraph should contain a delete node
+		expect('children' in paragraph && paragraph.children[0].type).toBe('delete');
+	});
+
+	it('does not affect the global processor', () => {
+		MdProcessor.createInstance({ remarkPlugins: [remarkGfm] });
+		const root = MdProcessor.parse('~~not deleted~~');
+		const paragraph = root.children[0];
+		// Global processor should NOT have GFM — no delete node
+		expect(paragraph.type).toBe('paragraph');
+		expect('children' in paragraph && paragraph.children[0].type).toBe('text');
+	});
+
+	it('creates multiple independent instances', () => {
+		const withGfm = MdProcessor.createInstance({ remarkPlugins: [remarkGfm] });
+		const withoutGfm = MdProcessor.createInstance({});
+
+		const rootWith = withGfm.parse('~~deleted~~');
+		const rootWithout = withoutGfm.parse('~~deleted~~');
+
+		expect('children' in rootWith.children[0] && rootWith.children[0].children[0].type).toBe(
+			'delete'
+		);
+		expect('children' in rootWithout.children[0] && rootWithout.children[0].children[0].type).toBe(
+			'text'
+		);
 	});
 });
 

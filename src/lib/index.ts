@@ -1,6 +1,7 @@
 import MdSvelte from './MdSvelte.svelte';
 import { MdProcessor } from './processor.js';
 
+export type { MarkdownProcessor, PluginProps } from './processor.js';
 export type { PluggableList } from 'unified';
 export type { Options as RemarkRehypeOptions } from 'remark-rehype';
 

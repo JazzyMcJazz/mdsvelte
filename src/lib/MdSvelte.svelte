@@ -32,9 +32,12 @@
 -->
 <script lang="ts">
 	import type { Root, Definition } from 'mdast';
+	import type { PluggableList } from 'unified';
+	import type { Options as RemarkRehypeOptions } from 'remark-rehype';
 	import { setContext, untrack } from 'svelte';
 	import Parser from './Parser.svelte';
 	import { IncrementalParser } from './incremental.js';
+	import { MdProcessor } from './processor.js';
 	import { defaultRenderers, type Renderers } from './options.js';
 	import { createReferences } from './references.js';
 
@@ -57,11 +60,37 @@
 		 * Set to 0 to disable throttling. Default: 0 (no throttling).
 		 */
 		throttleMs?: number;
+		/**
+		 * Instance-level remark plugins. When provided, overrides global plugins for this instance.
+		 */
+		remarkPlugins?: PluggableList;
+		/**
+		 * Instance-level rehype plugins. When provided, overrides global plugins for this instance.
+		 */
+		rehypePlugins?: PluggableList;
+		/**
+		 * Instance-level remark-rehype options. When provided, overrides global options for this instance.
+		 */
+		remarkRehypeOptions?: RemarkRehypeOptions;
 	}
 
-	let { source, renderers = {}, onparse, throttleMs = 0 }: Props = $props();
+	let {
+		source,
+		renderers = {},
+		onparse,
+		throttleMs = 0,
+		remarkPlugins,
+		rehypePlugins,
+		remarkRehypeOptions
+	}: Props = $props();
 
-	const parser = new IncrementalParser();
+	const parser = untrack(() => {
+		const hasInstancePlugins = remarkPlugins || rehypePlugins || remarkRehypeOptions;
+		const processor = hasInstancePlugins
+			? MdProcessor.createInstance({ remarkPlugins, rehypePlugins, remarkRehypeOptions })
+			: undefined;
+		return new IncrementalParser(processor);
+	});
 
 	let throttledSource = $state('');
 	let lastFlush = 0;
